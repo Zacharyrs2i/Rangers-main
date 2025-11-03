@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,75 +10,183 @@
   <meta property="og:type" content="website" />
   <meta property="og:url" content="." />
   <link rel="preconnect" href="https://discord.com">
-
+  <link rel="icon" href="/favicon.ico" />
   <style>
-    :root { --bg:#0b0f14; --panel:#111823; --muted:#9aa4b2; --chip:#0f1722; --brand:#5865F2; --text:#e6edf3; }
-    * { box-sizing:border-box }
-    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--text); }
-    .wrap { max-width:980px; margin:40px auto; padding:0 20px; }
-    .card { background:var(--panel); border-radius:16px; padding:24px; box-shadow:0 6px 24px rgba(0,0,0,.25) }
-    h1 { margin:0 0 8px 0; font-size:clamp(28px,4vw,40px) }
-    p.lead { margin:0 0 20px 0; color:var(--muted) }
-    .row { display:flex; gap:16px; flex-wrap:wrap; align-items:stretch; }
-    .stat { flex:1 1 160px; background:var(--chip); padding:18px; border-radius:12px; text-align:center }
-    .stat .label { font-size:14px; opacity:.75; margin-bottom:6px }
-    .stat .num { font-size:32px; font-weight:700 }
-    .btn { display:inline-block; background:var(--brand); color:#fff; padding:.85rem 1.2rem; border-radius:999px; text-decoration:none; font-weight:600 }
-    iframe { border:0; width:100%; height:420px; border-radius:12px; background:#0c1320 }
-    .footer { color:var(--muted); font-size:14px; margin-top:12px }
-    .grid { display:grid; gap:20px }
+    :root {
+      --brand: #2f855a; /* ranger green */
+      --brand-contrast: #ffffff;
+      --radius: 16px;
+      --shadow: 0 8px 28px rgba(0,0,0,.25);
+    }
+    /* Themes */
+    [data-theme="dark"]{
+      --bg: #0b0f14; --panel:#111823; --muted:#9aa4b2; --chip:#0f1722; --text:#e6edf3; --ring:#1f2937;
+    }
+    [data-theme="light"]{
+      --bg: #f7f7fb; --panel:#ffffff; --muted:#5b6b7a; --chip:#f0f3f8; --text:#0f172a; --ring:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--text)}
+    a{color:inherit}
+    /* Layout */
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);position:sticky;top:12px;backdrop-filter:saturate(140%) blur(6px)}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.2px}
+    .brand img{width:36px;height:36px;border-radius:9px;object-fit:cover;outline:2px solid var(--ring)}
+    .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:.75rem 1.1rem;font-weight:700;text-decoration:none;cursor:pointer;transition:transform .05s ease}
+    .btn:active{transform:translateY(1px)}
+    .btn-primary{background:var(--brand);color:var(--brand-contrast)}
+    .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--ring)}
+    .hero{margin-top:18px;display:grid;grid-template-columns:1.2fr .8fr;gap:22px}
+    @media (max-width:920px){.hero{grid-template-columns:1fr}}
+    .card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .card.pad{padding:22px}
+    .title{font-size:clamp(28px,4vw,44px);margin:0 0 6px}
+    .subtitle{color:var(--muted);margin:0 0 18px}
+    .stats{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0 18px}
+    .stat{flex:1 1 180px;background:var(--chip);border-radius:12px;padding:16px;text-align:center}
+    .stat .label{opacity:.7;font-size:14px}
+    .stat .num{font-size:34px;font-weight:800}
+    .panel-title{font-size:18px;margin:0 0 12px}
+    iframe{width:100%;height:480px;border:0;border-radius:12px;background:#0c1320}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:22px}
+    @media (max-width:920px){.grid{grid-template-columns:1fr}}
+    .footer{margin:22px 0;color:var(--muted);font-size:14px;text-align:center}
+    .switch{display:inline-flex;align-items:center;gap:8px}
+    .switch input{appearance:none;width:42px;height:24px;border-radius:999px;background:var(--chip);position:relative;outline:1px solid var(--ring);cursor:pointer}
+    .switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:var(--text);transition:left .18s ease}
+    .switch input:checked{background:var(--brand)}
+    .switch input:checked::after{left:21px;background:var(--brand-contrast)}
+    .note{font-size:13px;color:var(--muted)}
   </style>
 </head>
 <body>
-  <main class="wrap grid">
-    <section class="card">
-      <h1>Rangers HQ</h1>
-      <p class="lead">Jump in, squad up, and roll out. 💥</p>
+  <div class="container">
+    <!-- NAVBAR -->
+    <nav class="nav">
+      <div class="brand">
+        <img src="/logo.png" alt="Rangers logo" onerror="this.style.display='none'">
+        <span>Rangers HQ</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <label class="switch" title="Toggle light/dark">
+          <input id="themeToggle" type="checkbox" aria-label="Toggle theme">
+          <span>Theme</span>
+        </label>
+        <a class="btn btn-ghost" href="#live">Live</a>
+        <a class="btn btn-primary" href="https://discord.gg/uNmdfUJRVw" target="_blank" rel="noopener">Join Discord</a>
+      </div>
+    </nav>
 
-      <!-- Join button -->
-      <p><a class="btn" id="joinBtn" href="https://discord.gg/uNmdfUJRVw" target="_blank" rel="noopener">Join the Discord</a></p>
+    <!-- HERO / LEFT: summary; RIGHT: widget -->
+    <section class="hero">
+      <div class="card pad">
+        <h1 class="title">Squad up. Roll out. 💥</h1>
+        <p class="subtitle">Your one-stop hub for the Rangers Discord—live presence, member counts, and quick join access.</p>
 
-      <!-- Live stats -->
-      <div class="row" style="margin:16px 0 24px">
-        <div class="stat">
-          <div class="label">Members</div>
-          <div class="num" id="members">—</div>
+        <div class="stats" role="group" aria-label="Server stats">
+          <div class="stat">
+            <div class="label">Members</div>
+            <div class="num" id="members">—</div>
+          </div>
+          <div class="stat">
+            <div class="label">Online</div>
+            <div class="num" id="online">—</div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="label">Online</div>
-          <div class="num" id="online">—</div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="https://discord.gg/uNmdfUJRVw" target="_blank" rel="noopener">Join the Discord</a>
+          <button class="btn btn-ghost" id="refreshBtn" type="button">Refresh stats</button>
+          <label class="switch" title="Auto-refresh stats every 60s" style="align-self:center">
+            <input id="autoRefresh" type="checkbox" aria-label="Toggle auto refresh">
+            <span>Auto-refresh</span>
+          </label>
         </div>
+        <p class="note" id="lastUpdated">Last updated: —</p>
       </div>
 
-      <!-- Discord Server Widget -->
-      <h2 style="margin:8px 0 12px">Live Now</h2>
-      <iframe
-        src="https://discord.com/widget?id=1347988710695895181&theme=dark"
-        allowtransparency="true"
-        sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
-      </iframe>
-
-      <div class="footer">
-        Tip: If stats show “—”, your invite code might be invalid or Discord may be rate-limited—refresh or retry later.
+      <div id="live" class="card pad">
+        <h3 class="panel-title">Live Now</h3>
+        <iframe src="https://discord.com/widget?id=1347988710695895181&theme=dark"
+                allowtransparency="true"
+                sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+        <p class="note">If this panel is empty, ensure the Discord server widget is enabled in Server Settings → Integrations → Widget.</p>
       </div>
     </section>
-  </main>
+
+    <!-- EXTRA PANELS (placeholders for future stats/content) -->
+    <section class="grid">
+      <div class="card pad">
+        <h3 class="panel-title">About the Rangers</h3>
+        <p>We run coordinated ops, training, and casual squads. Keep comms clear, keep it fun, and watch your sectors. 🫡</p>
+      </div>
+      <div class="card pad">
+        <h3 class="panel-title">How to Join</h3>
+        <ol style="margin:0;padding-left:18px">
+          <li>Click <strong>Join Discord</strong>.</li>
+          <li>Verify in the entry channel.</li>
+          <li>Hop into voice when you're ready to roll.</li>
+        </ol>
+      </div>
+    </section>
+
+    <p class="footer">© <span id="year"></span> Rangers. Not affiliated with Discord.</p>
+  </div>
 
   <script>
-    const INVITE_CODE = "uNmdfUJRVw";
+    // ---- Theme toggle ----
+    const themeToggle = document.getElementById('themeToggle');
+    const storedTheme = localStorage.getItem('rangers-theme');
+    if (storedTheme) {
+      document.documentElement.setAttribute('data-theme', storedTheme);
+      themeToggle.checked = storedTheme === 'light';
+    }
+    themeToggle.addEventListener('change', () => {
+      const mode = themeToggle.checked ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', mode);
+      localStorage.setItem('rangers-theme', mode);
+    });
+
+    // ---- Server stats via public Invite API ----
+    const INVITE_CODE = 'uNmdfUJRVw';
+    const membersEl = document.getElementById('members');
+    const onlineEl  = document.getElementById('online');
+    const lastEl    = document.getElementById('lastUpdated');
+    const refreshBtn= document.getElementById('refreshBtn');
+    const autoRefreshToggle = document.getElementById('autoRefresh');
+    let autoTimer = null;
 
     async function loadCounts() {
       try {
         const res = await fetch(`https://discord.com/api/v10/invites/${INVITE_CODE}?with_counts=true`, {mode:'cors'});
-        if (!res.ok) throw new Error('HTTP ' + res.status);
+        if (!res.ok) throw new Error('HTTP '+res.status);
         const d = await res.json();
-        document.getElementById('members').textContent = d.approximate_member_count ?? '—';
-        document.getElementById('online').textContent  = d.approximate_presence_count ?? '—';
+        membersEl.textContent = d.approximate_member_count ?? '—';
+        onlineEl.textContent  = d.approximate_presence_count ?? '—';
+        lastEl.textContent    = 'Last updated: ' + new Date().toLocaleTimeString();
       } catch (e) {
-        console.warn("Discord counts fetch failed:", e);
+        console.warn('Discord counts fetch failed:', e);
+        lastEl.textContent = 'Last updated: failed';
       }
     }
+
+    function startAuto(){
+      if (autoTimer) clearInterval(autoTimer);
+      if (autoRefreshToggle.checked){
+        autoTimer = setInterval(loadCounts, 60000);
+      }
+    }
+
+    refreshBtn.addEventListener('click', loadCounts);
+    autoRefreshToggle.addEventListener('change', startAuto);
+
+    // Initial boot
     loadCounts();
+    startAuto();
+
+    // Year
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
