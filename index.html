@@ -4,12 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rangers HQ | Discord</title>
-  <meta name="description" content="Join the Rangers Discord and see live activity and member stats." />
+  <meta name="description" content="Join the 79th Rangers' Discord and see live activity and member stats." />
   <meta property="og:title" content="Rangers HQ" />
-  <meta property="og:description" content="Join the Rangers Discord and see live activity and member stats." />
+  <meta property="og:description" content="Join the 79th Rangers' Discord and see live activity and member stats." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="." />
   <link rel="preconnect" href="https://discord.com">
+
   <style>
     :root { --bg:#0b0f14; --panel:#111823; --muted:#9aa4b2; --chip:#0f1722; --brand:#5865F2; --text:#e6edf3; }
     * { box-sizing:border-box }
@@ -32,10 +33,12 @@
   <main class="wrap grid">
     <section class="card">
       <h1>Rangers HQ</h1>
-      <p class="lead">Jump in, squad up, and roll out. 💥</p>
+      <p class="lead">Jump in, squad up, and let loose hell. 💥</p>
 
-      <p><a class="btn" id="joinBtn" href="https://discord.gg/RaDDccFRSP" target="_blank" rel="noopener">Join the Discord</a></p>
+      <!-- Join button -->
+      <p><a class="btn" id="joinBtn" href="https://discord.gg/uNmdfUJRVw" target="_blank" rel="noopener">Join the Discord</a></p>
 
+      <!-- Live stats -->
       <div class="row" style="margin:16px 0 24px">
         <div class="stat">
           <div class="label">Members</div>
@@ -47,19 +50,23 @@
         </div>
       </div>
 
+      <!-- Discord Server Widget -->
       <h2 style="margin:8px 0 12px">Live Now</h2>
       <iframe
-        src="https://discord.com/widget?id=1412869943153917995&theme=dark"
+        src="https://discord.com/widget?id=1347988710695895181&theme=dark"
         allowtransparency="true"
         sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
       </iframe>
 
-      <div class="footer">Tip: If stats show “—”, your invite code might be invalid or Discord may be rate-limited—refresh or retry later.</div>
+      <div class="footer">
+        Tip: If stats show “—”, your invite code might be invalid or Discord may be rate-limited—refresh or retry later.
+      </div>
     </section>
   </main>
 
   <script>
-    const INVITE_CODE = "RaDDccFRSP";
+    const INVITE_CODE = "uNmdfUJRVw";
+
     async function loadCounts() {
       try {
         const res = await fetch(`https://discord.com/api/v10/invites/${INVITE_CODE}?with_counts=true`, {mode:'cors'});
@@ -73,5 +80,3 @@
     }
     loadCounts();
   </script>
-</body>
-</html>
