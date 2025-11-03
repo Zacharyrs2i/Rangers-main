@@ -4,9 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Rangers HQ | Discord</title>
-  <meta name="description" content="Join the 79th Rangers' Discord and see live activity and member stats." />
+  <meta name="description" content="Join the Rangers Discord and see live activity and member stats." />
   <meta property="og:title" content="Rangers HQ" />
-  <meta property="og:description" content="Join the 79th Rangers' Discord and see live activity and member stats." />
+  <meta property="og:description" content="Join the Rangers Discord and see live activity and member stats." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="." />
   <link rel="preconnect" href="https://discord.com">
@@ -58,6 +58,7 @@
     .switch input:checked{background:var(--brand)}
     .switch input:checked::after{left:21px;background:var(--brand-contrast)}
     .note{font-size:13px;color:var(--muted)}
+    input[type="search"], select{padding:10px 12px;border-radius:10px;border:1px solid var(--ring);background:var(--chip);color:var(--text)}
   </style>
 </head>
 <body>
@@ -74,6 +75,7 @@
           <span>Theme</span>
         </label>
         <a class="btn btn-ghost" href="#live">Live</a>
+        <a class="btn btn-ghost" href="#matches">Matches</a>
         <a class="btn btn-primary" href="https://discord.gg/uNmdfUJRVw" target="_blank" rel="noopener">Join Discord</a>
       </div>
     </nav>
@@ -81,8 +83,8 @@
     <!-- HERO / LEFT: summary; RIGHT: widget -->
     <section class="hero">
       <div class="card pad">
-        <h1 class="title">Squad up. Roll out. Let Loose Hell 💥</h1>
-        <p class="subtitle">Your one-stop hub for the 79th Rangers' Discord—live presence, member counts, and a link.</p>
+        <h1 class="title">Squad up. Roll out. 💥</h1>
+        <p class="subtitle">Your one-stop hub for the Rangers Discord—live presence, member counts, match archive, and quick join access.</p>
 
         <div class="stats" role="group" aria-label="Server stats">
           <div class="stat">
@@ -111,11 +113,29 @@
         <iframe src="https://discord.com/widget?id=1347988710695895181&theme=dark"
                 allowtransparency="true"
                 sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
-        <p class="note"></p>
+        <p class="note">If this panel is empty, ensure the Discord server widget is enabled in Server Settings → Integrations → Widget.</p>
       </div>
     </section>
 
-    <!-- EXTRA PANELS (placeholders for future stats/content) -->
+    <!-- MATCHES SECTION -->
+    <section id="matches" class="grid" style="margin-top:22px">
+      <div class="card pad" style="grid-column:1/-1">
+        <h3 class="panel-title">Past Matches</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 16px">
+          <input id="q" type="search" placeholder="Search opponent, map, mode…" style="flex:1 1 260px">
+          <select id="resultFilter">
+            <option value="">All Results</option>
+            <option>Win</option>
+            <option>Loss</option>
+            <option>Draw</option>
+          </select>
+        </div>
+        <div id="matchesList" class="grid" style="grid-template-columns:1fr 1fr;gap:16px"></div>
+        <p class="note" style="margin-top:12px">Edit matches in our <strong>Google Sheet</strong> (published as CSV). Columns: <code>date, opponent, mode, map, result, score, vod, vod2, vod3, clip1, clip2, report, notes</code>. Newest first.</p>
+      </div>
+    </section>
+
+    <!-- EXTRA PANELS (placeholders for future content) -->
     <section class="grid">
       <div class="card pad">
         <h3 class="panel-title">About the Rangers</h3>
@@ -125,8 +145,8 @@
         <h3 class="panel-title">How to Join</h3>
         <ol style="margin:0;padding-left:18px">
           <li>Click <strong>Join Discord</strong>.</li>
-          <li>Submit Application</li>
-          <li>Say HI in FNG Chat</li>
+          <li>Verify in the entry channel.</li>
+          <li>Hop into voice when you're ready to roll.</li>
         </ol>
       </div>
     </section>
@@ -173,13 +193,13 @@
 
     function startAuto(){
       if (autoTimer) clearInterval(autoTimer);
-      if (autoRefreshToggle.checked){
+      if (autoRefreshToggle && autoRefreshToggle.checked){
         autoTimer = setInterval(loadCounts, 60000);
       }
     }
 
-    refreshBtn.addEventListener('click', loadCounts);
-    autoRefreshToggle.addEventListener('change', startAuto);
+    if (refreshBtn) refreshBtn.addEventListener('click', loadCounts);
+    if (autoRefreshToggle) autoRefreshToggle.addEventListener('change', startAuto);
 
     // Initial boot
     loadCounts();
@@ -187,6 +207,120 @@
 
     // Year
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ---- Matches from Google Sheet (CSV) ----
+    const SHEET_ID = '1zjj_HKjjHrFQAeOYaCrxswn4cYbf4uqGzi8h0_TX5NY';
+    const SHEET_NAME = 'Matches';
+    const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(SHEET_NAME)}`;
+
+    function parseCSV(text){
+      const rows=[]; let i=0, field='', row=[], inQ=false;
+      while(i<text.length){
+        const c=text[i];
+        if(inQ){
+          if(c==='"' && text[i+1]==='"'){ field+='"'; i++; }
+          else if(c==='"'){ inQ=false; }
+          else { field+=c; }
+        }else{
+          if(c==='"'){ inQ=true; }
+          else if(c===','){ row.push(field.trim()); field=''; }
+          else if(c==='\n'){ row.push(field.trim()); rows.push(row); row=[]; field=''; }
+          else if(c==='\r'){ /* ignore */ }
+          else { field+=c; }
+        }
+        i++;
+      }
+      if(field.length||row.length) { row.push(field.trim()); rows.push(row); }
+      return rows;
+    }
+
+    async function loadMatches(){
+      try{
+        const res = await fetch(CSV_URL, {cache:'no-store'});
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const csv = await res.text();
+        const rows = parseCSV(csv);
+        if(!rows.length) throw new Error('No rows');
+        const headers = rows[0].map(h=>h.toLowerCase());
+        const idx = (name)=> headers.indexOf(name);
+        const items = rows.slice(1).filter(r=>r.some(Boolean)).map(r=>{
+          const get=(k)=>{ const j=idx(k); return j>-1? r[j]||'':'' };
+          const vods = [get('vod'), get('vod2'), get('vod3')].filter(Boolean);
+          const clips= [get('clip1'), get('clip2')].filter(Boolean);
+          return {
+            date: get('date'),
+            opponent: get('opponent'),
+            mode: get('mode'),
+            map: get('map'),
+            result: get('result'),
+            score: get('score'),
+            vods: vods.length? vods : undefined,
+            clips: clips.length? clips : undefined,
+            report: get('report'),
+            notes: get('notes')
+          };
+        });
+        items.sort((a,b)=> (b.date||'').localeCompare(a.date||''));
+        renderMatches(items);
+        // Filters
+        const q = document.getElementById('q');
+        const rf= document.getElementById('resultFilter');
+        const apply=()=>{
+          const term=(q.value||'').toLowerCase();
+          const want=rf.value;
+          const filtered = items.filter(m=>{
+            const hay = [m.opponent,m.map,m.mode,m.notes].join(' ').toLowerCase();
+            const okTerm = !term || hay.includes(term);
+            const okRes  = !want || (m.result||'').toLowerCase()===want.toLowerCase();
+            return okTerm && okRes;
+          });
+          renderMatches(filtered);
+        };
+        q.addEventListener('input', apply);
+        rf.addEventListener('change', apply);
+      }catch(e){
+        console.warn('Google Sheet CSV not found or invalid', e);
+        document.getElementById('matchesList').innerHTML = '<p class="note">No matches yet. Publish your Google Sheet as CSV and ensure headers match exactly.</p>';
+      }
+    }
+
+    function renderMatches(list){
+      const wrap = document.getElementById('matchesList');
+      if(!list.length){ wrap.innerHTML = '<p class="note">No matches match your filters.</p>'; return; }
+      wrap.innerHTML = list.map(m=>{
+        const date = m.date ? new Date(m.date+'T00:00:00').toLocaleDateString() : '—';
+        // Build link buttons (supports multiple VODs + clips)
+        let links = [];
+        const makeBtn = (url, label)=>`<a href="${url}" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:.45rem .75rem">${label}</a>`;
+        const labelFor = (url, i)=>{
+          try{ const u = new URL(url); const h = u.hostname;
+            if(h.includes('twitch')) return `Twitch VOD${i>1?` ${i}`:''}`;
+            if(h.includes('youtube')||h.includes('youtu.be')) return `YouTube VOD${i>1?` ${i}`:''}`;
+          }catch(e){}
+          return `VOD${i>1?` ${i}`:''}`;
+        };
+        if (Array.isArray(m.vods)) m.vods.forEach((v,i)=>{ if(v) links.push(makeBtn(v, labelFor(v, i+1))); });
+        if (Array.isArray(m.clips)) m.clips.forEach((c,i)=>{ if(c) links.push(makeBtn(c, `Clip ${i+1}`)); });
+        if (m.report) { links.push(makeBtn(m.report, 'Report')); }
+        return `
+        <article class="card pad">
+          <header style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+            <strong>${m.opponent||'Opponent'}</strong>
+            ${m.result?`<span style="padding:.2rem .55rem;border-radius:999px;background:var(--chip);border:1px solid var(--ring);font-weight:700">${m.result}</span>`:''}
+          </header>
+          <div style="color:var(--muted);font-size:14px;margin-bottom:10px">
+            <span>${date}</span>
+            ${m.mode?` · ${m.mode}`:''}
+            ${m.map?` · ${m.map}`:''}
+            ${m.score?` · Score: ${m.score}`:''}
+          </div>
+          <p style="margin:0 0 10px">${m.notes||''}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">${links.join('')}</div>
+        </article>`;
+      }).join('');
+    }
+
+    loadMatches();
   </script>
 </body>
 </html>
