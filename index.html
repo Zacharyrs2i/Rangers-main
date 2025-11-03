@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rangers HQ | Discord</title>
+  <meta name="description" content="Join the Rangers Discord and see live activity and member stats." />
+  <meta property="og:title" content="Rangers HQ" />
+  <meta property="og:description" content="Join the Rangers Discord and see live activity and member stats." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="." />
+  <link rel="preconnect" href="https://discord.com">
+  <style>
+    :root { --bg:#0b0f14; --panel:#111823; --muted:#9aa4b2; --chip:#0f1722; --brand:#5865F2; --text:#e6edf3; }
+    * { box-sizing:border-box }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:980px; margin:40px auto; padding:0 20px; }
+    .card { background:var(--panel); border-radius:16px; padding:24px; box-shadow:0 6px 24px rgba(0,0,0,.25) }
+    h1 { margin:0 0 8px 0; font-size:clamp(28px,4vw,40px) }
+    p.lead { margin:0 0 20px 0; color:var(--muted) }
+    .row { display:flex; gap:16px; flex-wrap:wrap; align-items:stretch; }
+    .stat { flex:1 1 160px; background:var(--chip); padding:18px; border-radius:12px; text-align:center }
+    .stat .label { font-size:14px; opacity:.75; margin-bottom:6px }
+    .stat .num { font-size:32px; font-weight:700 }
+    .btn { display:inline-block; background:var(--brand); color:#fff; padding:.85rem 1.2rem; border-radius:999px; text-decoration:none; font-weight:600 }
+    iframe { border:0; width:100%; height:420px; border-radius:12px; background:#0c1320 }
+    .footer { color:var(--muted); font-size:14px; margin-top:12px }
+    .grid { display:grid; gap:20px }
+  </style>
+</head>
+<body>
+  <main class="wrap grid">
+    <section class="card">
+      <h1>Rangers HQ</h1>
+      <p class="lead">Jump in, squad up, and roll out. 💥</p>
+
+      <p><a class="btn" id="joinBtn" href="https://discord.gg/RaDDccFRSP" target="_blank" rel="noopener">Join the Discord</a></p>
+
+      <div class="row" style="margin:16px 0 24px">
+        <div class="stat">
+          <div class="label">Members</div>
+          <div class="num" id="members">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Online</div>
+          <div class="num" id="online">—</div>
+        </div>
+      </div>
+
+      <h2 style="margin:8px 0 12px">Live Now</h2>
+      <iframe
+        src="https://discord.com/widget?id=1412869943153917995&theme=dark"
+        allowtransparency="true"
+        sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts">
+      </iframe>
+
+      <div class="footer">Tip: If stats show “—”, your invite code might be invalid or Discord may be rate-limited—refresh or retry later.</div>
+    </section>
+  </main>
+
+  <script>
+    const INVITE_CODE = "RaDDccFRSP";
+    async function loadCounts() {
+      try {
+        const res = await fetch(`https://discord.com/api/v10/invites/${INVITE_CODE}?with_counts=true`, {mode:'cors'});
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+        document.getElementById('members').textContent = d.approximate_member_count ?? '—';
+        document.getElementById('online').textContent  = d.approximate_presence_count ?? '—';
+      } catch (e) {
+        console.warn("Discord counts fetch failed:", e);
+      }
+    }
+    loadCounts();
+  </script>
+</body>
+</html>
